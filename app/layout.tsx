@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -21,6 +21,16 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Eli Bolos",
   description: "Gestão de encomendas e financeiro da confeitaria Eli Bolos.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Eli Bolos",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fdf3ec",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
