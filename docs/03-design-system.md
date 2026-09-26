@@ -48,7 +48,7 @@ Duas famílias, papéis bem separados — nunca misturadas na mesma função.
 
 | Família | Variável | Onde usa | Peso |
 |---|---|---|---|
-| **Fraunces** (serifada) | `--font-fraunces` (exposta como `font-heading`) | Só `h1`/`h2` de tela e números de destaque (total do pedido, "Meu lucro") | 600 |
+| **Instrument Serif** (serifada) | `--font-instrument-serif` (exposta como `font-heading`) | Só `h1`/`h2` de tela e números de destaque (total do pedido, "Meu lucro") | 400 (família só tem esse peso — `font-semibold` vira negrito sintético do navegador, testado e ficou bem) |
 | **Geist Sans** | `--font-geist-sans` (padrão do `<html>`) | Todo o resto — labels, inputs, botões, texto de corpo | 400 / 500 |
 
 `Geist Mono` está carregada mas **sem nenhum uso real** no app hoje — é peso morto (uma fonte a mais
@@ -159,12 +159,16 @@ família de pílula do sistema.
 
 ### Don't
 - Não usar `box-shadow` genérico cinza em card nenhum.
-- Não adicionar uma terceira família de fonte — Fraunces é só para título/destaque, o resto é sempre
+- Não adicionar uma terceira família de fonte — Instrument Serif é só para título/destaque, o resto é sempre
   Geist Sans.
 - Não deixar um formulário ou lista mais estreito que `max-w-md` **estático** em qualquer largura de
   tela — isso é o problema atual do desktop (ver seção Layout abaixo).
 - Não copiar estética de referência de marketing (hero gigante, gradiente decorativo, tipografia de
   100px+) — este é um app de uso diário, não uma landing page.
+- Não importar componente de botão do Spell UI direto (Rich/Flow/Pop Button) — todos usam paleta
+  Tailwind crua (`bg-blue-500`...), sombra/gradiente e raio diferente do nosso padrão. Dá pra pegar
+  emprestado um detalhe de interação pontual (ex.: leve "afundar" ao clicar), nunca o componente
+  inteiro.
 
 ---
 
