@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { clientes, pedidoItens, pedidos, produtos } from "@/lib/db/schema";
+import { clientes, pedidoItens, pedidoPagamentos, pedidos, produtos } from "@/lib/db/schema";
 
 export async function listPedidos() {
   return db
@@ -61,3 +61,34 @@ export async function getPedidoItens(pedidoId: string) {
 }
 
 export type PedidoItemComProduto = Awaited<ReturnType<typeof getPedidoItens>>[number];
+
+export async function getPagamentos(pedidoId: string) {
+  return db
+    .select()
+    .from(pedidoPagamentos)
+    .where(eq(pedidoPagamentos.pedidoId, pedidoId))
+    .orderBy(asc(pedidoPagamentos.dataPagamento));
+}
+
+/** Total combinado (soma dos preços finais dos itens), total já pago, e o que falta receber. */
+export async function getResumoFinanceiro(pedidoId: string) {
+  const [itens, pagamentos] = await Promise.all([
+    db
+      .select({ precoVendaFinalCentavos: pedidoItens.precoVendaFinalCentavos })
+      .from(pedidoItens)
+      .where(eq(pedidoItens.pedidoId, pedidoId)),
+    db
+      .select({ valorCentavos: pedidoPagamentos.valorCentavos })
+      .from(pedidoPagamentos)
+      .where(eq(pedidoPagamentos.pedidoId, pedidoId)),
+  ]);
+
+  const totalPedidoCentavos = itens.reduce((soma, i) => soma + i.precoVendaFinalCentavos, 0);
+  const totalPagoCentavos = pagamentos.reduce((soma, p) => soma + p.valorCentavos, 0);
+
+  return {
+    totalPedidoCentavos,
+    totalPagoCentavos,
+    saldoDevedorCentavos: totalPedidoCentavos - totalPagoCentavos,
+  };
+}

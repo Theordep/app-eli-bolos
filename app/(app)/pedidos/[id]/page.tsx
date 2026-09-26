@@ -1,9 +1,18 @@
 import { notFound } from "next/navigation";
-import { getPedido, getPedidoItens } from "@/lib/db/queries/pedidos";
+import {
+  getPagamentos,
+  getPedido,
+  getPedidoItens,
+  getResumoFinanceiro,
+} from "@/lib/db/queries/pedidos";
 import { listProdutosComFicha } from "@/lib/db/queries/produtos";
+import { getConfiguracaoAtual } from "@/lib/db/queries/configuracoes";
 import { StatusBadge } from "@/components/pedidos/status-badge";
 import { PedidoItemRow } from "@/components/pedidos/pedido-item-row";
 import { AddPedidoItemForm } from "@/components/pedidos/add-pedido-item-form";
+import { PagamentosList } from "@/components/pedidos/pagamentos-list";
+import { PagamentoForm } from "@/components/pedidos/pagamento-form";
+import { StatusActions } from "@/components/pedidos/status-actions";
 import { DeletePedidoButton } from "@/components/pedidos/delete-pedido-button";
 import { formatCentavosToBRL } from "@/lib/currency";
 
@@ -22,15 +31,22 @@ export default async function PedidoDetalhePage({
     notFound();
   }
 
-  const [itens, produtosDisponiveis] = await Promise.all([
+  const [itens, produtosDisponiveis, pagamentos, resumo, config] = await Promise.all([
     getPedidoItens(id),
     listProdutosComFicha(),
+    getPagamentos(id),
+    getResumoFinanceiro(id),
+    getConfiguracaoAtual(),
   ]);
 
-  const totalFinal = itens.reduce((soma, item) => soma + item.precoVendaFinalCentavos, 0);
   const totalCusto = itens.reduce(
     (soma, item) => soma + item.custoProducaoTotalCentavos,
     0,
+  );
+
+  const sinalMinimoPercentual = config ? Number(config.sinalMinimoPercentual) : 50;
+  const sinalMinimoCentavos = Math.round(
+    resumo.totalPedidoCentavos * (sinalMinimoPercentual / 100),
   );
 
   return (
@@ -78,11 +94,35 @@ export default async function PedidoDetalhePage({
           <div className="flex items-baseline justify-between">
             <span className="font-medium text-secondary-foreground">Total combinado</span>
             <span className="font-heading text-lg font-semibold text-secondary-foreground">
-              {formatCentavosToBRL(totalFinal)}
+              {formatCentavosToBRL(resumo.totalPedidoCentavos)}
             </span>
+          </div>
+          <div className="flex justify-between text-secondary-foreground/80">
+            <span>Já recebido</span>
+            <span>{formatCentavosToBRL(resumo.totalPagoCentavos)}</span>
+          </div>
+          <div className="flex justify-between font-medium text-secondary-foreground">
+            <span>Saldo devedor</span>
+            <span>{formatCentavosToBRL(Math.max(0, resumo.saldoDevedorCentavos))}</span>
           </div>
         </div>
       )}
+
+      <div>
+        <h2 className="mb-2 font-heading text-lg font-semibold text-foreground">Pagamentos</h2>
+        <div className="mb-3">
+          <PagamentosList pagamentos={pagamentos} />
+        </div>
+        <PagamentoForm pedidoId={pedido.id} />
+      </div>
+
+      <StatusActions
+        pedidoId={pedido.id}
+        status={pedido.status}
+        sinalMinimoCentavos={sinalMinimoCentavos}
+        totalPagoCentavos={resumo.totalPagoCentavos}
+        saldoDevedorCentavos={resumo.saldoDevedorCentavos}
+      />
 
       <div className="flex justify-center">
         <DeletePedidoButton pedidoId={pedido.id} />

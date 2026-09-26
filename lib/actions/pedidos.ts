@@ -5,9 +5,16 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { db } from "@/lib/db";
-import { pedidoItens, pedidos, produtoCustoSnapshot } from "@/lib/db/schema";
+import {
+  pedidoItens,
+  pedidoPagamentos,
+  pedidos,
+  produtoCustoSnapshot,
+  transacoesFinanceiras,
+} from "@/lib/db/schema";
 import { getProduto, getReceitaItensComInsumo } from "@/lib/db/queries/produtos";
 import { getConfiguracaoAtual } from "@/lib/db/queries/configuracoes";
+import { getPedido, getResumoFinanceiro } from "@/lib/db/queries/pedidos";
 import { calcularCustoDireto } from "@/lib/produto-custo";
 import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
 
@@ -176,4 +183,119 @@ export async function updatePedidoItemPreco(
 export async function removePedidoItem(itemId: string, pedidoId: string) {
   await db.delete(pedidoItens).where(eq(pedidoItens.id, itemId));
   revalidatePath(`/pedidos/${pedidoId}`);
+}
+
+const PagamentoSchema = z.object({
+  tipo: z.enum(["sinal", "saldo", "outro"], { error: "Escolha o tipo." }),
+  valorCentavos: z
+    .number({ error: "Digite o valor." })
+    .positive({ error: "Precisa ser maior que zero." }),
+  formaPagamento: z.enum(["pix", "dinheiro", "cartao", "outro"], {
+    error: "Escolha a forma de pagamento.",
+  }),
+});
+
+const CATEGORIA_POR_TIPO = {
+  sinal: "sinal_pedido",
+  saldo: "saldo_pedido",
+  outro: "outro",
+} as const;
+
+const TIPO_LABEL: Record<string, string> = { sinal: "Sinal", saldo: "Saldo", outro: "Pagamento" };
+
+export type PagamentoState = { error: string } | undefined;
+
+export async function addPagamento(
+  pedidoId: string,
+  _state: PagamentoState,
+  formData: FormData,
+): Promise<PagamentoState> {
+  const validated = PagamentoSchema.safeParse({
+    tipo: formData.get("tipo"),
+    valorCentavos: parseBRLToCentavos(String(formData.get("valorCentavos") ?? "")),
+    formaPagamento: formData.get("formaPagamento"),
+  });
+
+  if (!validated.success) {
+    return { error: "Confira os campos destacados." };
+  }
+
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+
+  const { tipo, valorCentavos, formaPagamento } = validated.data;
+  const hoje = new Date().toISOString().slice(0, 10);
+
+  const [pagamento] = await db
+    .insert(pedidoPagamentos)
+    .values({ pedidoId, tipo, valorCentavos, formaPagamento, confirmado: true })
+    .returning({ id: pedidoPagamentos.id });
+
+  await db.insert(transacoesFinanceiras).values({
+    tipo: "entrada",
+    categoria: CATEGORIA_POR_TIPO[tipo],
+    valorCentavos,
+    data: hoje,
+    descricao: `${TIPO_LABEL[tipo]} - ${pedido.cliente.nome}`,
+    pedidoPagamentoId: pagamento.id,
+  });
+
+  revalidatePath(`/pedidos/${pedidoId}`);
+  return undefined;
+}
+
+const TRANSICOES_PERMITIDAS: Record<string, string[]> = {
+  orcamento: ["confirmado", "cancelado"],
+  confirmado: ["producao", "entregue", "cancelado"],
+  producao: ["entregue", "cancelado"],
+  entregue: [],
+  cancelado: [],
+};
+
+export async function transitionPedidoStatus(
+  pedidoId: string,
+  novoStatus: "confirmado" | "producao" | "entregue" | "cancelado",
+): Promise<{ error?: string }> {
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+
+  if (!TRANSICOES_PERMITIDAS[pedido.status]?.includes(novoStatus)) {
+    return { error: `Não dá pra mudar de "${pedido.status}" pra "${novoStatus}".` };
+  }
+
+  const resumo = await getResumoFinanceiro(pedidoId);
+
+  if (novoStatus === "confirmado") {
+    if (resumo.totalPedidoCentavos <= 0) {
+      return { error: "Adicione pelo menos um produto antes de confirmar o pedido." };
+    }
+
+    const config = await getConfiguracaoAtual();
+    const sinalMinimoPercentual = config ? Number(config.sinalMinimoPercentual) : 50;
+    const sinalMinimoCentavos = Math.round(
+      resumo.totalPedidoCentavos * (sinalMinimoPercentual / 100),
+    );
+
+    if (resumo.totalPagoCentavos < sinalMinimoCentavos) {
+      return {
+        error: `Falta sinal: já entrou ${(resumo.totalPagoCentavos / 100).toFixed(2)} de ${(sinalMinimoCentavos / 100).toFixed(2)} necessários.`,
+      };
+    }
+  }
+
+  if (novoStatus === "entregue" && resumo.saldoDevedorCentavos > 0) {
+    return {
+      error: `Ainda falta receber ${(resumo.saldoDevedorCentavos / 100).toFixed(2)} pra marcar como entregue.`,
+    };
+  }
+
+  await db.update(pedidos).set({ status: novoStatus }).where(eq(pedidos.id, pedidoId));
+
+  revalidatePath(`/pedidos/${pedidoId}`);
+  revalidatePath("/pedidos");
+  return {};
 }
