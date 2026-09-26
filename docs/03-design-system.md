@@ -44,11 +44,13 @@ os tokens semânticos acima. Isso já é 100% verdade no código hoje (auditado)
 
 ## Tokens — Tipografia
 
-Duas famílias, papéis bem separados — nunca misturadas na mesma função.
+Duas famílias, papéis bem separados — nunca misturadas na mesma função. As duas são sem-serifa, mas a
+Bricolage Grotesque tem terminações excêntricas (a personalidade some se ela virar corpo de texto em
+tamanho pequeno) — é isso que separa título de corpo, não serifa-vs-sem-serifa.
 
 | Família | Variável | Onde usa | Peso |
 |---|---|---|---|
-| **Instrument Serif** (serifada) | `--font-instrument-serif` (exposta como `font-heading`) | Só `h1`/`h2` de tela e números de destaque (total do pedido, "Meu lucro") | 400 (família só tem esse peso — `font-semibold` vira negrito sintético do navegador, testado e ficou bem) |
+| **Bricolage Grotesque** | `--font-bricolage-grotesque` (exposta como `font-heading`) | Só `h1`/`h2` de tela e números de destaque (total do pedido, "Meu lucro") | 600 / 700 |
 | **Geist Sans** | `--font-geist-sans` (padrão do `<html>`) | Todo o resto — labels, inputs, botões, texto de corpo | 400 / 500 |
 
 `Geist Mono` está carregada mas **sem nenhum uso real** no app hoje — é peso morto (uma fonte a mais
@@ -159,7 +161,7 @@ família de pílula do sistema.
 
 ### Don't
 - Não usar `box-shadow` genérico cinza em card nenhum.
-- Não adicionar uma terceira família de fonte — Instrument Serif é só para título/destaque, o resto é sempre
+- Não adicionar uma terceira família de fonte — Bricolage Grotesque é só para título/destaque, o resto é sempre
   Geist Sans.
 - Não deixar um formulário ou lista mais estreito que `max-w-md` **estático** em qualquer largura de
   tela — isso é o problema atual do desktop (ver seção Layout abaixo).
