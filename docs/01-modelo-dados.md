@@ -45,7 +45,6 @@ ano" sem precisar reconstruir isso de outro lugar.
 | `taxa_perda_percentual` | numeric | padrão 10 |
 | `custo_invisivel_percentual` | numeric | % sobre o custo de insumos p/ cobrir gás/luz/água (padrão 15) |
 | `margem_lucro_padrao_percentual` | numeric | padrão sugerido (20–30%) |
-| `sinal_minimo_percentual` | numeric | % mínimo de sinal p/ confirmar pedido (padrão 50) |
 
 **Resolve:** centraliza as regras da fórmula de precificação (item 2–5 do domínio 1) num lugar só, em
 vez de espalhar constantes pelo código, **e** mantém rastro de como essas regras mudaram ao longo do
@@ -227,9 +226,12 @@ embute qualquer desconto dado. O relatório mensal soma isso por período sem pr
 | `data_pagamento` | timestamp | |
 | `confirmado` | bool | |
 
-Regra de negócio (aplicação, não constraint de banco): pedido só migra de `orcamento` para
-`confirmado` quando `SUM(pedido_pagamentos.valor_centavos WHERE confirmado)` ≥
-`configuracoes.sinal_minimo_percentual` do total do pedido.
+**Sem trava de sinal mínimo** (decisão revisada — ver `00-negocio.md` §3): `orcamento` → `confirmado`
+é livre, não depende de nenhum pagamento registrado. A única regra de negócio que continua existindo
+(aplicação, não constraint de banco) é `producao`/`confirmado` → `entregue`, que exige
+`SUM(pedido_pagamentos.valor_centavos)` ≥ soma de `pedido_itens.preco_venda_final_centavos` daquele
+pedido — ou seja, só marca como entregue quando o saldo estiver zerado, seja esse pagamento único
+(sem sinal) ou em duas partes (sinal + saldo).
 
 ---
 

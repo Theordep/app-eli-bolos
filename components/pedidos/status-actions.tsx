@@ -11,14 +11,12 @@ type StatusAlvo = Exclude<Status, "orcamento">;
 export function StatusActions({
   pedidoId,
   status,
-  sinalMinimoCentavos,
-  totalPagoCentavos,
+  totalPedidoCentavos,
   saldoDevedorCentavos,
 }: {
   pedidoId: string;
   status: Status;
-  sinalMinimoCentavos: number;
-  totalPagoCentavos: number;
+  totalPedidoCentavos: number;
   saldoDevedorCentavos: number;
 }) {
   const router = useRouter();
@@ -45,16 +43,15 @@ export function StatusActions({
     return <p className="text-sm text-muted-foreground">Pedido cancelado.</p>;
   }
 
-  const faltaSinal = sinalMinimoCentavos - totalPagoCentavos;
-  const podeConfirmar = status === "orcamento" && faltaSinal <= 0;
+  const podeConfirmar = status === "orcamento" && totalPedidoCentavos > 0;
 
   return (
     <div className="space-y-2">
       {status === "orcamento" && (
         <>
-          {faltaSinal > 0 && (
+          {totalPedidoCentavos <= 0 && (
             <p className="text-xs text-muted-foreground">
-              Falta {formatCentavosToBRL(faltaSinal)} de sinal pra poder confirmar.
+              Adicione pelo menos um produto pra poder confirmar.
             </p>
           )}
           <button

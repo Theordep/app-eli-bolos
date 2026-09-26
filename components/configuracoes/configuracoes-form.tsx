@@ -40,12 +40,6 @@ const FIELDS: Field[] = [
     hint: "Sugestão de lucro da empresa em cima do custo de produção (20–30% é comum).",
     suffix: "%",
   },
-  {
-    name: "sinalMinimoPercentual",
-    label: "Sinal mínimo pra confirmar pedido",
-    hint: "% do valor total que precisa entrar pra o pedido sair do orçamento.",
-    suffix: "%",
-  },
 ];
 
 export function ConfiguracoesForm({

@@ -41,7 +41,7 @@ Saída: **Custo de Produção** (soma de 1–4) e **Preço de Venda Sugerido** (
   recalcula com os preços atuais toda vez que ela abre a tela de produtos.
 - **Custo invisível = percentual sobre insumos** (decidido). Sem alternativa de "valor fixo" no MVP.
 - **Configurações de precificação são versionadas** (meta de salário, margem, % de perda, % de custo
-  invisível, % mínimo de sinal). Cada cálculo de ficha técnica guarda qual versão da configuração usou.
+  invisível). Cada cálculo de ficha técnica guarda qual versão da configuração usou.
 - **Histórico de preço dos insumos.** Toda vez que ela registra uma compra no mercado, o preço daquele
   insumo é atualizado automaticamente — ela não digita o custo do insumo duas vezes.
 - **Venda por quilo (bolos) ou por unidade (brigadeiro e afins).** Ela não trabalha com P/M/G — bolos
@@ -60,19 +60,24 @@ Fluxo (pelo WhatsApp, mas registrado no app):
 
 1. **Orçamento** — escolhe produto(s) e quantidade, vê o preço sugerido, define o preço final
    combinado com o cliente. Um pedido pode ter mais de um produto.
-2. **Confirmado (sinal pago)** — só entra na fila de produção depois que o sinal (padrão configurável,
-   ex.: 50% via Pix) é registrado como recebido. O saldo devedor fica visível.
+2. **Confirmado** — decisão dela, não depende de pagamento. Na prática, a maioria dos pedidos não
+   tem sinal — ela só recebe o valor no final, na entrega. Sinal continua existindo como forma de
+   pagamento que pode ser registrada (fica visível o quanto já entrou e o saldo devedor), mas **não
+   trava** a confirmação do pedido.
 3. **Produção/Geladeira** — painel agrupado por "Para Hoje", "Para Amanhã", "Próximos Dias", ordenado
    pela data de entrega.
-4. **Entregue** — confirma o recebimento do saldo. O sistema baixa o pedido, lança a entrada financeira
-   final e o relatório mensal já sabe separar quanto daquele valor era custo, mão de obra e lucro
-   (usando a foto de custo do passo 1 — não é um lançamento de dinheiro novo, é uma leitura).
+4. **Entregue** — só libera quando o saldo estiver quitado (não precisa ter vindo de sinal — pode ser
+   o pagamento único no final). O sistema baixa o pedido, lança a entrada financeira final e o
+   relatório mensal já sabe separar quanto daquele valor era custo, mão de obra e lucro (usando a foto
+   de custo do passo 1 — não é um lançamento de dinheiro novo, é uma leitura).
 
-### Ajustes propostos
+### Ajustes propostos (e já decididos)
 
-- **Percentual mínimo de sinal configurável** (não travar em 50%).
-- **Status de cancelamento** — precisa existir para tratar desistência/estorno de sinal sem sujar as
-  estatísticas de pedidos entregues.
+- **Sem sinal mínimo obrigatório.** Tentativa inicial era travar a confirmação num % de sinal
+  configurável — na prática não bate com o negócio dela (maioria paga só no final), então a trava foi
+  removida. `configuracoes` não tem mais esse campo.
+- **Status de cancelamento** — precisa existir para tratar desistência sem sujar as estatísticas de
+  pedidos entregues.
 - **Preço final pode divergir do sugerido** (ela dá desconto, cliente pechincha) — o lucro real do
   pedido é calculado sobre o preço final combinado, não sobre o sugerido.
 

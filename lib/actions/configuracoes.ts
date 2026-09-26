@@ -22,10 +22,6 @@ const ConfiguracoesSchema = z.object({
   margemLucroPadraoPercentual: z
     .number({ error: "Digite a margem de lucro." })
     .nonnegative({ error: "Não pode ser negativo." }),
-  sinalMinimoPercentual: z
-    .number({ error: "Digite o sinal mínimo." })
-    .min(0)
-    .max(100, { error: "No máximo 100%." }),
 });
 
 export type ConfiguracoesState = { error: string } | undefined;
@@ -46,7 +42,6 @@ export async function saveConfiguracoes(
     margemLucroPadraoPercentual: parseDecimal(
       String(formData.get("margemLucroPadraoPercentual") ?? ""),
     ),
-    sinalMinimoPercentual: parseDecimal(String(formData.get("sinalMinimoPercentual") ?? "")),
   });
 
   if (!validated.success) {
@@ -61,7 +56,6 @@ export async function saveConfiguracoes(
     taxaPerdaPercentual: String(data.taxaPerdaPercentual),
     custoInvisivelPercentual: String(data.custoInvisivelPercentual),
     margemLucroPadraoPercentual: String(data.margemLucroPadraoPercentual),
-    sinalMinimoPercentual: String(data.sinalMinimoPercentual),
   });
 
   redirect("/configuracoes");

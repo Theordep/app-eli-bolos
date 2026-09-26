@@ -1,0 +1,1 @@
+ALTER TABLE "configuracoes" DROP COLUMN "sinal_minimo_percentual";

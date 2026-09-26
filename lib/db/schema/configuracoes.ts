@@ -20,8 +20,5 @@ export const configuracoes = pgTable("configuracoes", {
   })
     .notNull()
     .default("25"),
-  sinalMinimoPercentual: numeric("sinal_minimo_percentual", { precision: 5, scale: 2 })
-    .notNull()
-    .default("50"),
   ...timestamps,
 });

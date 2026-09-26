@@ -269,22 +269,8 @@ export async function transitionPedidoStatus(
 
   const resumo = await getResumoFinanceiro(pedidoId);
 
-  if (novoStatus === "confirmado") {
-    if (resumo.totalPedidoCentavos <= 0) {
-      return { error: "Adicione pelo menos um produto antes de confirmar o pedido." };
-    }
-
-    const config = await getConfiguracaoAtual();
-    const sinalMinimoPercentual = config ? Number(config.sinalMinimoPercentual) : 50;
-    const sinalMinimoCentavos = Math.round(
-      resumo.totalPedidoCentavos * (sinalMinimoPercentual / 100),
-    );
-
-    if (resumo.totalPagoCentavos < sinalMinimoCentavos) {
-      return {
-        error: `Falta sinal: já entrou ${(resumo.totalPagoCentavos / 100).toFixed(2)} de ${(sinalMinimoCentavos / 100).toFixed(2)} necessários.`,
-      };
-    }
+  if (novoStatus === "confirmado" && resumo.totalPedidoCentavos <= 0) {
+    return { error: "Adicione pelo menos um produto antes de confirmar o pedido." };
   }
 
   if (novoStatus === "entregue" && resumo.saldoDevedorCentavos > 0) {

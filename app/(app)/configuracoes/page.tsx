@@ -24,7 +24,6 @@ export default async function ConfiguracoesPage() {
                 taxaPerdaPercentual: atual.taxaPerdaPercentual,
                 custoInvisivelPercentual: atual.custoInvisivelPercentual,
                 margemLucroPadraoPercentual: atual.margemLucroPadraoPercentual,
-                sinalMinimoPercentual: atual.sinalMinimoPercentual,
               }
             : {
                 metaSalarioMensalCentavos: "",
@@ -32,7 +31,6 @@ export default async function ConfiguracoesPage() {
                 taxaPerdaPercentual: "10",
                 custoInvisivelPercentual: "15",
                 margemLucroPadraoPercentual: "25",
-                sinalMinimoPercentual: "50",
               }
         }
       />

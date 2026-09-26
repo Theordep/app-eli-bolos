@@ -6,7 +6,6 @@ import {
   getResumoFinanceiro,
 } from "@/lib/db/queries/pedidos";
 import { listProdutosComFicha } from "@/lib/db/queries/produtos";
-import { getConfiguracaoAtual } from "@/lib/db/queries/configuracoes";
 import { StatusBadge } from "@/components/pedidos/status-badge";
 import { PedidoItemRow } from "@/components/pedidos/pedido-item-row";
 import { AddPedidoItemForm } from "@/components/pedidos/add-pedido-item-form";
@@ -31,22 +30,16 @@ export default async function PedidoDetalhePage({
     notFound();
   }
 
-  const [itens, produtosDisponiveis, pagamentos, resumo, config] = await Promise.all([
+  const [itens, produtosDisponiveis, pagamentos, resumo] = await Promise.all([
     getPedidoItens(id),
     listProdutosComFicha(),
     getPagamentos(id),
     getResumoFinanceiro(id),
-    getConfiguracaoAtual(),
   ]);
 
   const totalCusto = itens.reduce(
     (soma, item) => soma + item.custoProducaoTotalCentavos,
     0,
-  );
-
-  const sinalMinimoPercentual = config ? Number(config.sinalMinimoPercentual) : 50;
-  const sinalMinimoCentavos = Math.round(
-    resumo.totalPedidoCentavos * (sinalMinimoPercentual / 100),
   );
 
   return (
@@ -119,8 +112,7 @@ export default async function PedidoDetalhePage({
       <StatusActions
         pedidoId={pedido.id}
         status={pedido.status}
-        sinalMinimoCentavos={sinalMinimoCentavos}
-        totalPagoCentavos={resumo.totalPagoCentavos}
+        totalPedidoCentavos={resumo.totalPedidoCentavos}
         saldoDevedorCentavos={resumo.saldoDevedorCentavos}
       />
 
