@@ -43,6 +43,13 @@
       "when": 1790444754522,
       "tag": "0005_new_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790445274411,
+      "tag": "0006_needy_silvermane",
+      "breakpoints": true
     }
   ]
 }

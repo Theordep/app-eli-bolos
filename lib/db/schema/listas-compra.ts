@@ -17,7 +17,7 @@ export const listasCompraItens = pgTable("listas_compra_itens", {
   id: id(),
   listaCompraId: uuid("lista_compra_id")
     .notNull()
-    .references(() => listasCompra.id),
+    .references(() => listasCompra.id, { onDelete: "cascade" }),
   insumoId: uuid("insumo_id")
     .notNull()
     .references(() => insumos.id),
