@@ -6,6 +6,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { insumoHistoricoPrecos, insumos } from "@/lib/db/schema";
 import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
+import { requireUser } from "@/lib/auth";
 
 const InsumoSchema = z.object({
   nome: z.string().trim().min(1, { error: "Digite um nome." }),
@@ -38,6 +39,7 @@ export async function createInsumo(
   _state: InsumoState,
   formData: FormData,
 ): Promise<InsumoState> {
+  await requireUser();
   const validated = parseForm(formData);
 
   if (!validated.success) {
@@ -65,6 +67,7 @@ export async function updateInsumo(
   _state: InsumoState,
   formData: FormData,
 ): Promise<InsumoState> {
+  await requireUser();
   const validated = parseForm(formData);
 
   if (!validated.success) {
@@ -74,7 +77,10 @@ export async function updateInsumo(
   const data = validated.data;
 
   const [existing] = await db
-    .select({ precoCentavos: insumos.embalagemPrecoCentavos })
+    .select({
+      precoCentavos: insumos.embalagemPrecoCentavos,
+      quantidadeBase: insumos.embalagemQuantidadeBase,
+    })
     .from(insumos)
     .where(eq(insumos.id, insumoId));
 
@@ -83,7 +89,11 @@ export async function updateInsumo(
     .set({ ...data, embalagemQuantidadeBase: String(data.embalagemQuantidadeBase) })
     .where(eq(insumos.id, insumoId));
 
-  if (existing && existing.precoCentavos !== data.embalagemPrecoCentavos) {
+  const mudouPreco = existing && existing.precoCentavos !== data.embalagemPrecoCentavos;
+  const mudouQuantidade =
+    existing && Number(existing.quantidadeBase) !== data.embalagemQuantidadeBase;
+
+  if (mudouPreco || mudouQuantidade) {
     await db.insert(insumoHistoricoPrecos).values({
       insumoId,
       precoCentavos: data.embalagemPrecoCentavos,
@@ -95,6 +105,8 @@ export async function updateInsumo(
 }
 
 export async function deleteInsumo(insumoId: string): Promise<{ error?: string }> {
+  await requireUser();
+
   try {
     await db.delete(insumos).where(eq(insumos.id, insumoId));
   } catch {

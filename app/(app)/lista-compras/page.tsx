@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { listListasCompra } from "@/lib/db/queries/listas-compra";
 import { GerarListaForm } from "@/components/lista-compras/gerar-lista-form";
+import { deslocarDiasISO } from "@/lib/date";
 
 function formatData(data: string) {
   const [ano, mes, dia] = data.split("-");
   return `${dia}/${mes}/${ano}`;
-}
-
-function dataLocalISO(offsetDias = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDias);
-  return d.toLocaleDateString("en-CA");
 }
 
 export default async function ListaComprasPage() {
@@ -20,7 +15,7 @@ export default async function ListaComprasPage() {
     <div className="mx-auto max-w-md space-y-5">
       <h1 className="font-heading text-xl font-semibold text-foreground">Lista de Compras</h1>
 
-      <GerarListaForm dataInicioPadrao={dataLocalISO(0)} dataFimPadrao={dataLocalISO(7)} />
+      <GerarListaForm dataInicioPadrao={deslocarDiasISO(0)} dataFimPadrao={deslocarDiasISO(7)} />
 
       <div>
         <h2 className="mb-2 text-sm font-medium text-muted-foreground">Listas geradas</h2>

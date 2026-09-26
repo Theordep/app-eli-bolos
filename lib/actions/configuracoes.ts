@@ -5,6 +5,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { configuracoes } from "@/lib/db/schema";
 import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
+import { requireUser } from "@/lib/auth";
 
 const ConfiguracoesSchema = z.object({
   metaSalarioMensalCentavos: z
@@ -30,6 +31,7 @@ export async function saveConfiguracoes(
   _state: ConfiguracoesState,
   formData: FormData,
 ): Promise<ConfiguracoesState> {
+  await requireUser();
   const validated = ConfiguracoesSchema.safeParse({
     metaSalarioMensalCentavos: parseBRLToCentavos(
       String(formData.get("metaSalarioMensalCentavos") ?? ""),

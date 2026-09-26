@@ -7,6 +7,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { listasCompra, listasCompraItens } from "@/lib/db/schema";
 import { getInsumosNecessarios } from "@/lib/db/queries/listas-compra";
+import { requireUser } from "@/lib/auth";
 
 const GerarListaSchema = z.object({
   dataInicioPeriodo: z.string().min(1, { error: "Escolha a data de início." }),
@@ -19,6 +20,7 @@ export async function gerarListaCompra(
   _state: GerarListaState,
   formData: FormData,
 ): Promise<GerarListaState> {
+  await requireUser();
   const validated = GerarListaSchema.safeParse({
     dataInicioPeriodo: formData.get("dataInicioPeriodo"),
     dataFimPeriodo: formData.get("dataFimPeriodo"),
@@ -64,6 +66,7 @@ export async function toggleItemComprado(
   listaCompraId: string,
   comprado: boolean,
 ) {
+  await requireUser();
   await db
     .update(listasCompraItens)
     .set({ comprado })
@@ -73,6 +76,7 @@ export async function toggleItemComprado(
 }
 
 export async function concluirListaCompra(listaCompraId: string) {
+  await requireUser();
   await db
     .update(listasCompra)
     .set({ status: "concluida" })
@@ -83,6 +87,7 @@ export async function concluirListaCompra(listaCompraId: string) {
 }
 
 export async function deletarListaCompra(listaCompraId: string) {
+  await requireUser();
   await db.delete(listasCompra).where(eq(listasCompra.id, listaCompraId));
   revalidatePath("/lista-compras");
 }

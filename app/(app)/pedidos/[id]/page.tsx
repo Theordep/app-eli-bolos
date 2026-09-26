@@ -42,6 +42,9 @@ export default async function PedidoDetalhePage({
     0,
   );
 
+  const editavel = pedido.status === "orcamento";
+  const podePagar = pedido.status !== "cancelado";
+
   return (
     <div className="mx-auto max-w-md space-y-5">
       <div>
@@ -70,12 +73,23 @@ export default async function PedidoDetalhePage({
         ) : (
           <ul className="mb-3 space-y-2">
             {itens.map((item) => (
-              <PedidoItemRow key={item.id} item={item} pedidoId={pedido.id} />
+              <PedidoItemRow
+                key={item.id}
+                item={item}
+                pedidoId={pedido.id}
+                editavel={editavel}
+              />
             ))}
           </ul>
         )}
 
-        <AddPedidoItemForm pedidoId={pedido.id} produtos={produtosDisponiveis} />
+        {editavel ? (
+          <AddPedidoItemForm pedidoId={pedido.id} produtos={produtosDisponiveis} />
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Os itens não podem mais ser alterados porque o pedido já saiu do orçamento.
+          </p>
+        )}
       </div>
 
       {itens.length > 0 && (
@@ -106,7 +120,7 @@ export default async function PedidoDetalhePage({
         <div className="mb-3">
           <PagamentosList pagamentos={pagamentos} />
         </div>
-        <PagamentoForm pedidoId={pedido.id} />
+        {podePagar && <PagamentoForm pedidoId={pedido.id} />}
       </div>
 
       <StatusActions

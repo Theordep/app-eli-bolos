@@ -10,9 +10,11 @@ import type { PedidoItemComProduto } from "@/lib/db/queries/pedidos";
 export function PedidoItemRow({
   item,
   pedidoId,
+  editavel,
 }: {
   item: PedidoItemComProduto;
   pedidoId: string;
+  editavel: boolean;
 }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(
@@ -24,7 +26,11 @@ export function PedidoItemRow({
 
   async function handleRemove() {
     if (!window.confirm(`Remover "${item.produto.nome}" deste pedido?`)) return;
-    await removePedidoItem(item.id, pedidoId);
+    const result = await removePedidoItem(item.id, pedidoId);
+    if (result.error) {
+      window.alert(result.error);
+      return;
+    }
     router.refresh();
   }
 
@@ -38,14 +44,16 @@ export function PedidoItemRow({
             {item.tempoEPorUnidade ? "/un" : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleRemove}
-          aria-label={`Remover ${item.produto.nome}`}
-          className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="size-4" aria-hidden />
-        </button>
+        {editavel && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            aria-label={`Remover ${item.produto.nome}`}
+            className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </button>
+        )}
       </div>
 
       <dl className="mt-2 space-y-1 text-xs text-muted-foreground">
@@ -63,26 +71,35 @@ export function PedidoItemRow({
         </div>
       </dl>
 
-      <form action={formAction} className="mt-2 flex items-center gap-2">
-        <label htmlFor={`preco-${item.id}`} className="text-sm font-medium text-foreground">
-          Preço combinado
-        </label>
-        <input
-          id={`preco-${item.id}`}
-          name="precoVendaFinalCentavos"
-          type="text"
-          inputMode="decimal"
-          defaultValue={centavosToInputValue(item.precoVendaFinalCentavos)}
-          className="ml-auto w-24 rounded-lg border border-input bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-        />
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg border border-border px-2.5 py-1.5 text-sm text-foreground hover:bg-muted disabled:opacity-50"
-        >
-          {pending ? "…" : "Salvar"}
-        </button>
-      </form>
+      {editavel ? (
+        <form action={formAction} className="mt-2 flex items-center gap-2">
+          <label htmlFor={`preco-${item.id}`} className="text-sm font-medium text-foreground">
+            Preço combinado
+          </label>
+          <input
+            id={`preco-${item.id}`}
+            name="precoVendaFinalCentavos"
+            type="text"
+            inputMode="decimal"
+            defaultValue={centavosToInputValue(item.precoVendaFinalCentavos)}
+            className="ml-auto w-24 rounded-lg border border-input bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-lg border border-border px-2.5 py-1.5 text-sm text-foreground hover:bg-muted disabled:opacity-50"
+          >
+            {pending ? "…" : "Salvar"}
+          </button>
+        </form>
+      ) : (
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-sm font-medium text-foreground">Preço combinado</span>
+          <span className="text-sm font-medium text-foreground">
+            {formatCentavosToBRL(item.precoVendaFinalCentavos)}
+          </span>
+        </div>
+      )}
       {state?.error && <p className="mt-1 text-xs text-destructive">{state.error}</p>}
     </li>
   );

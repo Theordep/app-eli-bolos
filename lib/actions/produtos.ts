@@ -7,6 +7,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { produtos, receitaItens } from "@/lib/db/schema";
 import { parseDecimal } from "@/lib/currency";
+import { requireUser } from "@/lib/auth";
 
 const ProdutoSchema = z.object({
   nome: z.string().trim().min(1, { error: "Digite um nome." }),
@@ -36,6 +37,7 @@ export async function createProduto(
   _state: ProdutoState,
   formData: FormData,
 ): Promise<ProdutoState> {
+  await requireUser();
   const validated = parseProdutoForm(formData);
 
   if (!validated.success) {
@@ -55,6 +57,7 @@ export async function updateProduto(
   _state: ProdutoState,
   formData: FormData,
 ): Promise<ProdutoState> {
+  await requireUser();
   const validated = parseProdutoForm(formData);
 
   if (!validated.success) {
@@ -68,6 +71,8 @@ export async function updateProduto(
 }
 
 export async function deleteProduto(produtoId: string): Promise<{ error?: string }> {
+  await requireUser();
+
   try {
     await db.delete(produtos).where(eq(produtos.id, produtoId));
   } catch {
@@ -93,6 +98,7 @@ export async function addReceitaItem(
   _state: ReceitaItemState,
   formData: FormData,
 ): Promise<ReceitaItemState> {
+  await requireUser();
   const validated = ReceitaItemSchema.safeParse({
     insumoId: formData.get("insumoId"),
     quantidadeUtilizada: parseDecimal(String(formData.get("quantidadeUtilizada") ?? "")),
@@ -118,6 +124,7 @@ export async function updateReceitaItem(
   _state: ReceitaItemState,
   formData: FormData,
 ): Promise<ReceitaItemState> {
+  await requireUser();
   const quantidade = parseDecimal(String(formData.get("quantidadeUtilizada") ?? ""));
 
   if (!quantidade) {
@@ -134,6 +141,7 @@ export async function updateReceitaItem(
 }
 
 export async function removeReceitaItem(receitaItemId: string, produtoId: string) {
+  await requireUser();
   await db.delete(receitaItens).where(eq(receitaItens.id, receitaItemId));
   revalidatePath(`/produtos/${produtoId}`);
 }

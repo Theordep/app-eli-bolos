@@ -2,16 +2,11 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { listPedidos } from "@/lib/db/queries/pedidos";
 import { StatusBadge } from "@/components/pedidos/status-badge";
+import { deslocarDiasISO } from "@/lib/date";
 
 function formatData(data: string) {
   const [ano, mes, dia] = data.split("-");
   return `${dia}/${mes}/${ano}`;
-}
-
-function dataLocalISO(offsetDias = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDias);
-  return d.toLocaleDateString("en-CA"); // YYYY-MM-DD no fuso local
 }
 
 type Pedido = Awaited<ReturnType<typeof listPedidos>>[number];
@@ -19,8 +14,8 @@ type Pedido = Awaited<ReturnType<typeof listPedidos>>[number];
 export default async function PedidosPage() {
   const lista = await listPedidos();
 
-  const hoje = dataLocalISO(0);
-  const amanha = dataLocalISO(1);
+  const hoje = deslocarDiasISO(0);
+  const amanha = deslocarDiasISO(1);
 
   const emAndamento = lista.filter(
     (p) => p.status === "confirmado" || p.status === "producao",
@@ -28,6 +23,10 @@ export default async function PedidosPage() {
 
   const grupos: { titulo: string; pedidos: Pedido[] }[] = [
     { titulo: "Orçamentos", pedidos: lista.filter((p) => p.status === "orcamento") },
+    {
+      titulo: "Atrasados",
+      pedidos: emAndamento.filter((p) => p.dataEntregaPrevista < hoje),
+    },
     {
       titulo: "Para hoje",
       pedidos: emAndamento.filter((p) => p.dataEntregaPrevista === hoje),
@@ -38,9 +37,7 @@ export default async function PedidosPage() {
     },
     {
       titulo: "Próximos dias",
-      pedidos: emAndamento.filter(
-        (p) => p.dataEntregaPrevista !== hoje && p.dataEntregaPrevista !== amanha,
-      ),
+      pedidos: emAndamento.filter((p) => p.dataEntregaPrevista > amanha),
     },
     {
       titulo: "Entregues",

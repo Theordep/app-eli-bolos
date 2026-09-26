@@ -6,6 +6,8 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { comprasInsumos, insumoHistoricoPrecos, insumos, transacoesFinanceiras } from "@/lib/db/schema";
 import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
+import { hojeISO } from "@/lib/date";
+import { requireUser } from "@/lib/auth";
 
 const CompraSchema = z.object({
   insumoId: z.uuid().optional(),
@@ -22,6 +24,7 @@ export async function createCompra(
   _state: CompraState,
   formData: FormData,
 ): Promise<CompraState> {
+  await requireUser();
   const insumoIdRaw = String(formData.get("insumoId") ?? "").trim();
 
   const validated = CompraSchema.safeParse({
@@ -36,7 +39,7 @@ export async function createCompra(
   }
 
   const { insumoId, valorCentavos, quantidadeComprada, observacao } = validated.data;
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
 
   const [compra] = await db
     .insert(comprasInsumos)

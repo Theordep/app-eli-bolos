@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import * as z from "zod";
 import { db } from "@/lib/db";
 import { clientes } from "@/lib/db/schema";
+import { requireUser } from "@/lib/auth";
 
 const ClienteSchema = z.object({
   nome: z.string().trim().min(1, { error: "Digite um nome." }),
@@ -28,6 +29,7 @@ export async function createCliente(
   _state: ClienteState,
   formData: FormData,
 ): Promise<ClienteState> {
+  await requireUser();
   const validated = parseForm(formData);
   if (!validated.success) {
     return { error: "Confira os campos destacados." };
@@ -42,6 +44,7 @@ export async function updateCliente(
   _state: ClienteState,
   formData: FormData,
 ): Promise<ClienteState> {
+  await requireUser();
   const validated = parseForm(formData);
   if (!validated.success) {
     return { error: "Confira os campos destacados." };
@@ -52,6 +55,8 @@ export async function updateCliente(
 }
 
 export async function deleteCliente(clienteId: string): Promise<{ error?: string }> {
+  await requireUser();
+
   try {
     await db.delete(clientes).where(eq(clientes.id, clienteId));
   } catch {

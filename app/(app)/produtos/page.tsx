@@ -13,13 +13,17 @@ export default async function ProdutosPage() {
 
   const custosPorProduto = new Map<string, number>();
   if (config) {
-    for (const produto of lista) {
-      const itens = await getReceitaItensComInsumo(produto.id);
+    const itensPorProduto = await Promise.all(
+      lista.map((produto) => getReceitaItensComInsumo(produto.id)),
+    );
+
+    lista.forEach((produto, i) => {
+      const itens = itensPorProduto[i];
       if (itens.length > 0) {
         const custo = calcularCustoDireto(itens, config);
         custosPorProduto.set(produto.id, custo.custoDiretoTotalCentavos);
       }
-    }
+    });
   }
 
   return (

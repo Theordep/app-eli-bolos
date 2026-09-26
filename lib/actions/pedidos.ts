@@ -17,6 +17,8 @@ import { getConfiguracaoAtual } from "@/lib/db/queries/configuracoes";
 import { getPedido, getResumoFinanceiro } from "@/lib/db/queries/pedidos";
 import { calcularCustoDireto } from "@/lib/produto-custo";
 import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
+import { hojeISO } from "@/lib/date";
+import { requireUser } from "@/lib/auth";
 
 const PedidoSchema = z.object({
   clienteId: z.uuid({ error: "Escolha um cliente." }),
@@ -30,6 +32,7 @@ export async function createPedido(
   _state: PedidoState,
   formData: FormData,
 ): Promise<PedidoState> {
+  await requireUser();
   const validated = PedidoSchema.safeParse({
     clienteId: formData.get("clienteId"),
     dataEntregaPrevista: formData.get("dataEntregaPrevista"),
@@ -40,7 +43,7 @@ export async function createPedido(
     return { error: "Confira os campos destacados." };
   }
 
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
 
   const [pedido] = await db
     .insert(pedidos)
@@ -51,6 +54,8 @@ export async function createPedido(
 }
 
 export async function deletePedido(pedidoId: string): Promise<{ error?: string }> {
+  await requireUser();
+
   try {
     await db.delete(pedidos).where(eq(pedidos.id, pedidoId));
   } catch {
@@ -78,6 +83,16 @@ export async function addPedidoItem(
   _state: PedidoItemState,
   formData: FormData,
 ): Promise<PedidoItemState> {
+  await requireUser();
+
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+  if (pedido.status !== "orcamento") {
+    return { error: "Só dá pra alterar os itens enquanto o pedido está em orçamento." };
+  }
+
   const validated = PedidoItemSchema.safeParse({
     produtoId: formData.get("produtoId"),
     quantidade: parseDecimal(String(formData.get("quantidade") ?? "")),
@@ -101,6 +116,10 @@ export async function addPedidoItem(
   const produto = await getProduto(produtoId);
   if (!produto) {
     return { error: "Produto não encontrado." };
+  }
+
+  if (produto.modoVenda === "unidade" && !Number.isInteger(quantidade)) {
+    return { error: "Esse produto é vendido por unidade — a quantidade precisa ser um número inteiro." };
   }
 
   const itensReceita = await getReceitaItensComInsumo(produtoId);
@@ -165,6 +184,16 @@ export async function updatePedidoItemPreco(
   _state: PrecoFinalState,
   formData: FormData,
 ): Promise<PrecoFinalState> {
+  await requireUser();
+
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+  if (pedido.status !== "orcamento") {
+    return { error: "Só dá pra alterar o preço enquanto o pedido está em orçamento." };
+  }
+
   const preco = parseBRLToCentavos(String(formData.get("precoVendaFinalCentavos") ?? ""));
 
   if (preco === null) {
@@ -180,9 +209,23 @@ export async function updatePedidoItemPreco(
   return undefined;
 }
 
-export async function removePedidoItem(itemId: string, pedidoId: string) {
+export async function removePedidoItem(
+  itemId: string,
+  pedidoId: string,
+): Promise<{ error?: string }> {
+  await requireUser();
+
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+  if (pedido.status !== "orcamento") {
+    return { error: "Só dá pra remover itens enquanto o pedido está em orçamento." };
+  }
+
   await db.delete(pedidoItens).where(eq(pedidoItens.id, itemId));
   revalidatePath(`/pedidos/${pedidoId}`);
+  return {};
 }
 
 const PagamentoSchema = z.object({
@@ -201,6 +244,16 @@ export async function addPagamento(
   _state: PagamentoState,
   formData: FormData,
 ): Promise<PagamentoState> {
+  await requireUser();
+
+  const pedido = await getPedido(pedidoId);
+  if (!pedido) {
+    return { error: "Pedido não encontrado." };
+  }
+  if (pedido.status === "cancelado") {
+    return { error: "Esse pedido foi cancelado — não dá pra registrar pagamento nele." };
+  }
+
   const validated = PagamentoSchema.safeParse({
     valorCentavos: parseBRLToCentavos(String(formData.get("valorCentavos") ?? "")),
     formaPagamento: formData.get("formaPagamento"),
@@ -210,13 +263,8 @@ export async function addPagamento(
     return { error: "Confira os campos destacados." };
   }
 
-  const pedido = await getPedido(pedidoId);
-  if (!pedido) {
-    return { error: "Pedido não encontrado." };
-  }
-
   const { valorCentavos, formaPagamento } = validated.data;
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
 
   const [pagamento] = await db
     .insert(pedidoPagamentos)
@@ -248,6 +296,8 @@ export async function transitionPedidoStatus(
   pedidoId: string,
   novoStatus: "confirmado" | "producao" | "entregue" | "cancelado",
 ): Promise<{ error?: string }> {
+  await requireUser();
+
   const pedido = await getPedido(pedidoId);
   if (!pedido) {
     return { error: "Pedido não encontrado." };
