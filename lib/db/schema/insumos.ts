@@ -23,7 +23,7 @@ export const insumoHistoricoPrecos = pgTable("insumo_historico_precos", {
   id: id(),
   insumoId: uuid("insumo_id")
     .notNull()
-    .references(() => insumos.id),
+    .references(() => insumos.id, { onDelete: "cascade" }),
   precoCentavos: integer("preco_centavos").notNull(),
   registradoEm: timestamp("registrado_em", { withTimezone: true }).notNull().defaultNow(),
   origem: origemPrecoEnum("origem").notNull(),
