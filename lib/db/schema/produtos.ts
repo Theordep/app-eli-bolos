@@ -22,7 +22,7 @@ export const receitaItens = pgTable("receita_itens", {
   id: id(),
   produtoId: uuid("produto_id")
     .notNull()
-    .references(() => produtos.id),
+    .references(() => produtos.id, { onDelete: "cascade" }),
   insumoId: uuid("insumo_id")
     .notNull()
     .references(() => insumos.id),
@@ -35,7 +35,7 @@ export const produtoCustoSnapshot = pgTable("produto_custo_snapshot", {
   id: id(),
   produtoId: uuid("produto_id")
     .notNull()
-    .references(() => produtos.id),
+    .references(() => produtos.id, { onDelete: "cascade" }),
   configuracaoId: uuid("configuracao_id")
     .notNull()
     .references(() => configuracoes.id),

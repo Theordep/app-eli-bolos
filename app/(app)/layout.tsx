@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Settings } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { logout } from "@/lib/actions/auth";
 
@@ -21,15 +22,25 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </span>
         </div>
 
-        <form action={logout}>
-          <button
-            type="submit"
-            aria-label="Sair"
+        <div className="flex items-center gap-1">
+          <Link
+            href="/configuracoes"
+            aria-label="Configurações"
             className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <LogOut className="size-5" aria-hidden />
-          </button>
-        </form>
+            <Settings className="size-5" aria-hidden />
+          </Link>
+
+          <form action={logout}>
+            <button
+              type="submit"
+              aria-label="Sair"
+              className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <LogOut className="size-5" aria-hidden />
+            </button>
+          </form>
+        </div>
       </header>
 
       <main className="flex-1 px-4 py-5">{children}</main>
