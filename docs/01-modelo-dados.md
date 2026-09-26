@@ -220,18 +220,19 @@ embute qualquer desconto dado. O relatório mensal soma isso por período sem pr
 |---|---|---|
 | `id` | uuid | |
 | `pedido_id` | FK → pedidos | |
-| `tipo` | enum(`sinal`,`saldo`,`outro`) | |
 | `valor_centavos` | int | |
 | `forma_pagamento` | enum(`pix`,`dinheiro`,`cartao`,`outro`) | |
 | `data_pagamento` | timestamp | |
 | `confirmado` | bool | |
 
-**Sem trava de sinal mínimo** (decisão revisada — ver `00-negocio.md` §3): `orcamento` → `confirmado`
-é livre, não depende de nenhum pagamento registrado. A única regra de negócio que continua existindo
-(aplicação, não constraint de banco) é `producao`/`confirmado` → `entregue`, que exige
-`SUM(pedido_pagamentos.valor_centavos)` ≥ soma de `pedido_itens.preco_venda_final_centavos` daquele
-pedido — ou seja, só marca como entregue quando o saldo estiver zerado, seja esse pagamento único
-(sem sinal) ou em duas partes (sinal + saldo).
+**Sem "tipo" de pagamento.** A distinção sinal/saldo foi removida (ver `00-negocio.md` §3) — "sinal"
+não é uma palavra que ela usa no dia a dia, e a maioria dos pedidos não tem pagamento parcial mesmo.
+Um pagamento é só um pagamento; o saldo devedor é sempre `SUM(pedido_itens.preco_venda_final_centavos)
+− SUM(pedido_pagamentos.valor_centavos)`, não importa em quantas parcelas o dinheiro entrou.
+
+**Sem trava de sinal mínimo**: `orcamento` → `confirmado` é livre, não depende de nenhum pagamento
+registrado. A única regra de negócio que continua existindo (aplicação, não constraint de banco) é
+`producao`/`confirmado` → `entregue`, que exige o saldo devedor zerado.
 
 ---
 
@@ -243,11 +244,11 @@ Toda movimentação de dinheiro real passa por aqui — é a única tabela que o
 |---|---|---|
 | `id` | uuid | |
 | `tipo` | enum(`entrada`,`saida`) | |
-| `categoria` | enum(`sinal_pedido`,`saldo_pedido`,`compra_insumo`,`compra_diversa`,`outro`) | |
+| `categoria` | enum(`pagamento_pedido`,`compra_insumo`,`compra_diversa`,`outro`) | |
 | `valor_centavos` | int | |
 | `data` | date | |
 | `descricao` | text, nullable | "Fiz de Venda" / "Gastei no Mercado" na UI vem daqui |
-| `pedido_pagamento_id` | FK → pedido_pagamentos, nullable | preenchido quando `categoria` é sinal/saldo |
+| `pedido_pagamento_id` | FK → pedido_pagamentos, nullable | preenchido quando `categoria` é `pagamento_pedido` |
 | `compra_insumo_id` | FK → compras_insumos, nullable | preenchido quando `categoria` é compra_insumo |
 
 **Resolve o Domínio 4:** entradas/saídas/saldo do mês são um `GROUP BY tipo, categoria` nesta tabela —

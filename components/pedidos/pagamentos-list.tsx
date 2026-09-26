@@ -1,6 +1,5 @@
 import { formatCentavosToBRL } from "@/lib/currency";
 
-const TIPO_LABEL: Record<string, string> = { sinal: "Sinal", saldo: "Saldo", outro: "Outro" };
 const FORMA_LABEL: Record<string, string> = {
   pix: "Pix",
   dinheiro: "Dinheiro",
@@ -10,7 +9,6 @@ const FORMA_LABEL: Record<string, string> = {
 
 type Pagamento = {
   id: string;
-  tipo: string;
   valorCentavos: number;
   formaPagamento: string;
   dataPagamento: Date;
@@ -33,7 +31,8 @@ export function PagamentosList({ pagamentos }: { pagamentos: Pagamento[] }) {
           className="flex items-center justify-between rounded-lg bg-card px-3 py-2 text-sm"
         >
           <span className="text-foreground">
-            {TIPO_LABEL[p.tipo]} · {FORMA_LABEL[p.formaPagamento]}
+            {FORMA_LABEL[p.formaPagamento]} ·{" "}
+            {new Date(p.dataPagamento).toLocaleDateString("pt-BR")}
           </span>
           <span className="font-medium text-foreground">
             {formatCentavosToBRL(p.valorCentavos)}

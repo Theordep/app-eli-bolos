@@ -60,22 +60,24 @@ Fluxo (pelo WhatsApp, mas registrado no app):
 
 1. **Orçamento** — escolhe produto(s) e quantidade, vê o preço sugerido, define o preço final
    combinado com o cliente. Um pedido pode ter mais de um produto.
-2. **Confirmado** — decisão dela, não depende de pagamento. Na prática, a maioria dos pedidos não
-   tem sinal — ela só recebe o valor no final, na entrega. Sinal continua existindo como forma de
-   pagamento que pode ser registrada (fica visível o quanto já entrou e o saldo devedor), mas **não
-   trava** a confirmação do pedido.
+2. **Confirmado** — decisão dela, não depende de pagamento. Na prática, a maioria dos pedidos é paga
+   só no final, na entrega — pagamento parcial antes disso é exceção, não regra. Um pagamento
+   registrado (fica visível o quanto já entrou e o saldo devedor) nunca trava a confirmação do pedido.
 3. **Produção/Geladeira** — painel agrupado por "Para Hoje", "Para Amanhã", "Próximos Dias", ordenado
    pela data de entrega.
-4. **Entregue** — só libera quando o saldo estiver quitado (não precisa ter vindo de sinal — pode ser
-   o pagamento único no final). O sistema baixa o pedido, lança a entrada financeira final e o
-   relatório mensal já sabe separar quanto daquele valor era custo, mão de obra e lucro (usando a foto
-   de custo do passo 1 — não é um lançamento de dinheiro novo, é uma leitura).
+4. **Entregue** — só libera quando o saldo estiver quitado (pago de uma vez ou em partes, tanto faz).
+   O sistema baixa o pedido, lança a entrada financeira final e o relatório mensal já sabe separar
+   quanto daquele valor era custo, mão de obra e lucro (usando a foto de custo do passo 1 — não é um
+   lançamento de dinheiro novo, é uma leitura).
 
 ### Ajustes propostos (e já decididos)
 
 - **Sem sinal mínimo obrigatório.** Tentativa inicial era travar a confirmação num % de sinal
   configurável — na prática não bate com o negócio dela (maioria paga só no final), então a trava foi
   removida. `configuracoes` não tem mais esse campo.
+- **Sem "tipo" de pagamento (nada de sinal/saldo).** "Sinal" não é uma palavra que ela usa no dia a
+  dia, e distinguir "pagamento parcial" de "pagamento final" não trazia benefício real — o que importa
+  é só quanto já entrou vs. quanto falta. Um pagamento registrado é só isso: um pagamento.
 - **Status de cancelamento** — precisa existir para tratar desistência sem sujar as estatísticas de
   pedidos entregues.
 - **Preço final pode divergir do sugerido** (ela dá desconto, cliente pechincha) — o lucro real do

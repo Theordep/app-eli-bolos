@@ -36,6 +36,13 @@
       "when": 1790444402728,
       "tag": "0004_tricky_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790444754522,
+      "tag": "0005_new_invaders",
+      "breakpoints": true
     }
   ]
 }

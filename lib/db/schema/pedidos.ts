@@ -1,6 +1,6 @@
 import { boolean, date, integer, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { id, timestamps } from "./_helpers";
-import { formaPagamentoEnum, pagamentoTipoEnum, pedidoStatusEnum } from "./enums";
+import { formaPagamentoEnum, pedidoStatusEnum } from "./enums";
 import { clientes } from "./clientes";
 import { produtos, produtoCustoSnapshot } from "./produtos";
 
@@ -46,7 +46,6 @@ export const pedidoPagamentos = pgTable("pedido_pagamentos", {
   pedidoId: uuid("pedido_id")
     .notNull()
     .references(() => pedidos.id, { onDelete: "cascade" }),
-  tipo: pagamentoTipoEnum("tipo").notNull(),
   valorCentavos: integer("valor_centavos").notNull(),
   formaPagamento: formaPagamentoEnum("forma_pagamento").notNull(),
   dataPagamento: timestamp("data_pagamento", { withTimezone: true }).notNull().defaultNow(),

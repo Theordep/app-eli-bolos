@@ -186,7 +186,6 @@ export async function removePedidoItem(itemId: string, pedidoId: string) {
 }
 
 const PagamentoSchema = z.object({
-  tipo: z.enum(["sinal", "saldo", "outro"], { error: "Escolha o tipo." }),
   valorCentavos: z
     .number({ error: "Digite o valor." })
     .positive({ error: "Precisa ser maior que zero." }),
@@ -194,14 +193,6 @@ const PagamentoSchema = z.object({
     error: "Escolha a forma de pagamento.",
   }),
 });
-
-const CATEGORIA_POR_TIPO = {
-  sinal: "sinal_pedido",
-  saldo: "saldo_pedido",
-  outro: "outro",
-} as const;
-
-const TIPO_LABEL: Record<string, string> = { sinal: "Sinal", saldo: "Saldo", outro: "Pagamento" };
 
 export type PagamentoState = { error: string } | undefined;
 
@@ -211,7 +202,6 @@ export async function addPagamento(
   formData: FormData,
 ): Promise<PagamentoState> {
   const validated = PagamentoSchema.safeParse({
-    tipo: formData.get("tipo"),
     valorCentavos: parseBRLToCentavos(String(formData.get("valorCentavos") ?? "")),
     formaPagamento: formData.get("formaPagamento"),
   });
@@ -225,20 +215,20 @@ export async function addPagamento(
     return { error: "Pedido não encontrado." };
   }
 
-  const { tipo, valorCentavos, formaPagamento } = validated.data;
+  const { valorCentavos, formaPagamento } = validated.data;
   const hoje = new Date().toISOString().slice(0, 10);
 
   const [pagamento] = await db
     .insert(pedidoPagamentos)
-    .values({ pedidoId, tipo, valorCentavos, formaPagamento, confirmado: true })
+    .values({ pedidoId, valorCentavos, formaPagamento, confirmado: true })
     .returning({ id: pedidoPagamentos.id });
 
   await db.insert(transacoesFinanceiras).values({
     tipo: "entrada",
-    categoria: CATEGORIA_POR_TIPO[tipo],
+    categoria: "pagamento_pedido",
     valorCentavos,
     data: hoje,
-    descricao: `${TIPO_LABEL[tipo]} - ${pedido.cliente.nome}`,
+    descricao: `Pagamento - ${pedido.cliente.nome}`,
     pedidoPagamentoId: pagamento.id,
   });
 

@@ -13,26 +13,14 @@ export function PagamentoForm({ pedidoId }: { pedidoId: string }) {
     <form action={formAction} className="space-y-2 rounded-xl border border-dashed border-border p-3.5">
       <p className="text-sm font-medium text-foreground">Registrar pagamento</p>
 
-      <div className="flex items-center gap-2">
-        <select
-          name="tipo"
-          defaultValue="sinal"
-          className="rounded-lg border border-input bg-card px-2.5 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-        >
-          <option value="sinal">Sinal</option>
-          <option value="saldo">Saldo</option>
-          <option value="outro">Outro</option>
-        </select>
-
-        <input
-          name="valorCentavos"
-          type="text"
-          inputMode="decimal"
-          placeholder="Valor, ex.: 50,00"
-          required
-          className="min-w-0 flex-1 rounded-lg border border-input bg-card px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
-        />
-      </div>
+      <input
+        name="valorCentavos"
+        type="text"
+        inputMode="decimal"
+        placeholder="Valor, ex.: 50,00"
+        required
+        className="w-full rounded-lg border border-input bg-card px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+      />
 
       <select
         name="formaPagamento"
