@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, Users } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { logout } from "@/lib/actions/auth";
 
@@ -23,6 +23,14 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         </div>
 
         <div className="flex items-center gap-1">
+          <Link
+            href="/clientes"
+            aria-label="Clientes"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <Users className="size-5" aria-hidden />
+          </Link>
+
           <Link
             href="/configuracoes"
             aria-label="Configurações"

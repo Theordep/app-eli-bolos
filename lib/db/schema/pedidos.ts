@@ -23,7 +23,7 @@ export const pedidoItens = pgTable("pedido_itens", {
   id: id(),
   pedidoId: uuid("pedido_id")
     .notNull()
-    .references(() => pedidos.id),
+    .references(() => pedidos.id, { onDelete: "cascade" }),
   produtoId: uuid("produto_id")
     .notNull()
     .references(() => produtos.id),
@@ -45,7 +45,7 @@ export const pedidoPagamentos = pgTable("pedido_pagamentos", {
   id: id(),
   pedidoId: uuid("pedido_id")
     .notNull()
-    .references(() => pedidos.id),
+    .references(() => pedidos.id, { onDelete: "cascade" }),
   tipo: pagamentoTipoEnum("tipo").notNull(),
   valorCentavos: integer("valor_centavos").notNull(),
   formaPagamento: formaPagamentoEnum("forma_pagamento").notNull(),

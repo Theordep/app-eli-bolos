@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, Home, Package } from "lucide-react";
+import { ChefHat, ClipboardList, Home, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
   { href: "/", label: "Início", icon: Home },
-  { href: "/insumos", label: "Insumos", icon: Package },
+  { href: "/pedidos", label: "Pedidos", icon: ClipboardList },
   { href: "/produtos", label: "Produtos", icon: ChefHat },
+  { href: "/insumos", label: "Insumos", icon: Package },
 ];
 
 export function BottomNav() {
