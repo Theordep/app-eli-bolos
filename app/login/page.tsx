@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Image from "next/image";
 import { login } from "@/lib/actions/auth";
 
 export default function LoginPage() {
@@ -12,8 +13,10 @@ export default function LoginPage() {
         action={formAction}
         className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-sm"
       >
-        <h1 className="text-xl font-semibold text-neutral-900">Eli Bolos</h1>
-        <p className="text-sm text-neutral-500">Entre para continuar.</p>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Image src="/logo.png" alt="Eli Bolos" width={96} height={96} priority />
+          <p className="text-sm text-neutral-500">Entre para continuar.</p>
+        </div>
 
         <div className="space-y-1">
           <label htmlFor="email" className="text-sm font-medium text-neutral-700">
