@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { db } from "@/lib/db";
 import {
+  clientes,
   pedidoItens,
   pedidoPagamentos,
   pedidos,
@@ -20,10 +21,14 @@ import { parseBRLToCentavos, parseDecimal } from "@/lib/currency";
 import { hojeISO } from "@/lib/date";
 import { requireUser } from "@/lib/auth";
 
+const NOVO_CLIENTE = "__novo__";
+
 const PedidoSchema = z.object({
-  clienteId: z.uuid({ error: "Escolha um cliente." }),
+  clienteId: z.string().min(1, { error: "Escolha um cliente." }),
   dataEntregaPrevista: z.string().min(1, { error: "Escolha a data de entrega." }),
   observacoes: z.string().trim().optional(),
+  novoClienteNome: z.string().trim().optional(),
+  novoClienteWhatsapp: z.string().trim().optional(),
 });
 
 export type PedidoState = { error: string } | undefined;
@@ -37,17 +42,37 @@ export async function createPedido(
     clienteId: formData.get("clienteId"),
     dataEntregaPrevista: formData.get("dataEntregaPrevista"),
     observacoes: formData.get("observacoes") || undefined,
+    novoClienteNome: formData.get("novoClienteNome") || undefined,
+    novoClienteWhatsapp: formData.get("novoClienteWhatsapp") || undefined,
   });
 
   if (!validated.success) {
     return { error: "Confira os campos destacados." };
   }
 
+  const { clienteId, dataEntregaPrevista, observacoes, novoClienteNome, novoClienteWhatsapp } =
+    validated.data;
+
+  let clienteIdFinal = clienteId;
+
+  if (clienteId === NOVO_CLIENTE) {
+    if (!novoClienteNome) {
+      return { error: "Preencha o nome do novo cliente." };
+    }
+
+    const [novoCliente] = await db
+      .insert(clientes)
+      .values({ nome: novoClienteNome, telefoneWhatsapp: novoClienteWhatsapp || null })
+      .returning({ id: clientes.id });
+
+    clienteIdFinal = novoCliente.id;
+  }
+
   const hoje = hojeISO();
 
   const [pedido] = await db
     .insert(pedidos)
-    .values({ ...validated.data, dataPedido: hoje })
+    .values({ clienteId: clienteIdFinal, dataEntregaPrevista, observacoes, dataPedido: hoje })
     .returning({ id: pedidos.id });
 
   redirect(`/pedidos/${pedido.id}`);
@@ -276,7 +301,7 @@ export async function addPagamento(
     categoria: "pagamento_pedido",
     valorCentavos,
     data: hoje,
-    descricao: `Pagamento - ${pedido.cliente.nome}`,
+    descricao: pedido.cliente.nome,
     pedidoPagamentoId: pagamento.id,
   });
 

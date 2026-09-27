@@ -1,0 +1,1 @@
+ALTER TABLE "clientes" ALTER COLUMN "telefone_whatsapp" DROP NOT NULL;

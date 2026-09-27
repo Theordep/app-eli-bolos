@@ -14,12 +14,12 @@ const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Eli Bolos",
-  description: "Gestão de encomendas e financeiro da confeitaria Eli Bolos.",
+  title: "Bolos Elisângela",
+  description: "Gestão de encomendas e financeiro da confeitaria Bolos Elisângela.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Eli Bolos",
+    title: "Bolos Elisângela",
   },
 };
 

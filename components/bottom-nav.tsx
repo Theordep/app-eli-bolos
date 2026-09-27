@@ -2,25 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, ClipboardList, Home, Package } from "lucide-react";
+import { NAV_ITEMS } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
-
-const ITEMS = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/pedidos", label: "Pedidos", icon: ClipboardList },
-  { href: "/produtos", label: "Produtos", icon: ChefHat },
-  { href: "/insumos", label: "Insumos", icon: Package },
-];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
     <nav
-      className="sticky bottom-0 z-10 flex border-t border-border bg-card/95 backdrop-blur"
+      className="sticky bottom-0 z-10 grid grid-cols-4 border-t border-border bg-card md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {ITEMS.map(({ href, label, icon: Icon }) => {
+      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
         return (
@@ -28,11 +21,11 @@ export function BottomNav() {
             key={href}
             href={href}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium",
-              active ? "text-primary" : "text-muted-foreground",
+              "flex min-h-12 flex-col items-center justify-center gap-[3px] py-1.5 text-[11px]",
+              active ? "font-medium text-primary" : "font-normal text-muted-foreground",
             )}
           >
-            <Icon className="size-5" aria-hidden />
+            <Icon className="size-[22px]" aria-hidden />
             {label}
           </Link>
         );

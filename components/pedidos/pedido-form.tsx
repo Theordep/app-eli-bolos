@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createPedido, type PedidoState } from "@/lib/actions/pedidos";
+import { PhoneInput } from "@/components/phone-input";
+
+const NOVO_CLIENTE = "__novo__";
 
 export function PedidoForm({
   clientes,
@@ -12,6 +15,8 @@ export function PedidoForm({
     createPedido,
     undefined,
   );
+  const [clienteId, setClienteId] = useState("");
+  const criandoCliente = clienteId === NOVO_CLIENTE;
 
   return (
     <form action={formAction} className="space-y-4">
@@ -23,12 +28,14 @@ export function PedidoForm({
           id="clienteId"
           name="clienteId"
           required
-          defaultValue=""
+          value={clienteId}
+          onChange={(e) => setClienteId(e.target.value)}
           className="w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-base text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         >
           <option value="" disabled>
             Escolha um cliente
           </option>
+          <option value={NOVO_CLIENTE}>+ Novo cliente</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nome}
@@ -36,6 +43,36 @@ export function PedidoForm({
           ))}
         </select>
       </div>
+
+      {criandoCliente && (
+        <div className="space-y-3 rounded-xl border border-dashed border-border p-3.5">
+          <div className="space-y-1.5">
+            <label htmlFor="novoClienteNome" className="text-sm font-medium text-foreground">
+              Nome do cliente
+            </label>
+            <input
+              id="novoClienteNome"
+              name="novoClienteNome"
+              type="text"
+              required={criandoCliente}
+              className="w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-base text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="novoClienteWhatsapp" className="text-sm font-medium text-foreground">
+              WhatsApp (opcional)
+            </label>
+            <PhoneInput
+              id="novoClienteWhatsapp"
+              name="novoClienteWhatsapp"
+              className="w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
+            <p className="text-xs text-muted-foreground">
+              Sem pressa — se não preencher agora, fica marcado como pendente na tela de Clientes.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <label htmlFor="dataEntregaPrevista" className="text-sm font-medium text-foreground">
@@ -46,7 +83,7 @@ export function PedidoForm({
           name="dataEntregaPrevista"
           type="date"
           required
-          className="w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-base text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+          className="h-11 w-full appearance-none rounded-xl border border-input bg-card px-3.5 py-0 text-base text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       </div>
 

@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Eli Bolos",
-    short_name: "Eli Bolos",
-    description: "Gestão de encomendas e financeiro da confeitaria Eli Bolos.",
+    name: "Bolos Elisângela",
+    short_name: "Bolos Eli",
+    description: "Gestão de encomendas e financeiro da confeitaria Bolos Elisângela.",
     start_url: "/",
     scope: "/",
     display: "standalone",

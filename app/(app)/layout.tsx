@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ListChecks, LogOut, Settings, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
+import { Sidebar } from "@/components/sidebar";
+import { SECONDARY_NAV_ITEMS } from "@/lib/nav-items";
 import { logout } from "@/lib/actions/auth";
 
 // Área autenticada e orientada a dados que mudam a cada request (pedidos, insumos, financeiro) —
@@ -10,58 +12,53 @@ export const dynamic = "force-dynamic";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header
-        className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 px-4 py-3 backdrop-blur"
-        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-      >
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="" width={32} height={32} aria-hidden />
-          <span className="font-heading text-lg font-semibold text-foreground">
-            Eli Bolos
+    <div className="flex min-h-screen flex-col bg-background md:flex-row">
+      <Sidebar />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header
+          className="flex items-center gap-2.5 px-4 pb-2 md:hidden"
+          style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}
+        >
+          <Image
+            src="/logo.png"
+            alt=""
+            width={36}
+            height={36}
+            aria-hidden
+            className="rounded-full"
+          />
+          <span className="min-w-0 flex-1 truncate font-heading text-lg font-bold text-foreground">
+            Bolos Elisângela
           </span>
-        </div>
 
-        <div className="flex items-center gap-1">
-          <Link
-            href="/clientes"
-            aria-label="Clientes"
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <Users className="size-5" aria-hidden />
-          </Link>
+          <div className="ml-auto flex items-center gap-1">
+            {SECONDARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <Icon className="size-[18px]" aria-hidden />
+              </Link>
+            ))}
+            <form action={logout}>
+              <button
+                type="submit"
+                aria-label="Sair"
+                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <LogOut className="size-[18px]" aria-hidden />
+              </button>
+            </form>
+          </div>
+        </header>
 
-          <Link
-            href="/lista-compras"
-            aria-label="Lista de Compras"
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <ListChecks className="size-5" aria-hidden />
-          </Link>
+        <main className="flex-1 px-4 pb-4 md:px-12 md:py-9">{children}</main>
 
-          <Link
-            href="/configuracoes"
-            aria-label="Configurações"
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <Settings className="size-5" aria-hidden />
-          </Link>
-
-          <form action={logout}>
-            <button
-              type="submit"
-              aria-label="Sair"
-              className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <LogOut className="size-5" aria-hidden />
-            </button>
-          </form>
-        </div>
-      </header>
-
-      <main className="flex-1 px-4 py-5">{children}</main>
-
-      <BottomNav />
+        <BottomNav />
+      </div>
     </div>
   );
 }

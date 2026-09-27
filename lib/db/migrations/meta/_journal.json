@@ -50,6 +50,13 @@
       "when": 1790445274411,
       "tag": "0006_needy_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790462378190,
+      "tag": "0007_curly_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }

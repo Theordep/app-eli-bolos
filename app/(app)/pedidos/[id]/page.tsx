@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   getPagamentos,
   getPedido,
@@ -54,7 +55,13 @@ export default async function PedidoDetalhePage({
           </h1>
           <StatusBadge status={pedido.status} />
         </div>
-        <p className="text-sm text-muted-foreground">{pedido.cliente.telefoneWhatsapp}</p>
+        <p className="text-sm text-muted-foreground">
+          {pedido.cliente.telefoneWhatsapp || (
+            <Link href={`/clientes/${pedido.cliente.id}`} className="text-primary underline">
+              Falta o WhatsApp — completar cadastro
+            </Link>
+          )}
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">
           Entrega em {formatData(pedido.dataEntregaPrevista)}
         </p>

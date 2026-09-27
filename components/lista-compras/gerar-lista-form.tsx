@@ -27,7 +27,7 @@ export function GerarListaForm({
             type="date"
             defaultValue={dataInicioPadrao}
             required
-            className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+            className="h-9 w-full appearance-none rounded-lg border border-input bg-background px-2.5 py-0 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <div className="space-y-1">
@@ -40,7 +40,7 @@ export function GerarListaForm({
             type="date"
             defaultValue={dataFimPadrao}
             required
-            className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+            className="h-9 w-full appearance-none rounded-lg border border-input bg-background px-2.5 py-0 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
       </div>

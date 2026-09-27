@@ -52,11 +52,15 @@ export async function createCompra(
     })
     .returning({ id: comprasInsumos.id });
 
+  let insumoNome: string | undefined;
+
   if (insumoId) {
-    await db
+    const [atualizado] = await db
       .update(insumos)
       .set({ embalagemPrecoCentavos: valorCentavos })
-      .where(eq(insumos.id, insumoId));
+      .where(eq(insumos.id, insumoId))
+      .returning({ nome: insumos.nome });
+    insumoNome = atualizado?.nome;
 
     await db.insert(insumoHistoricoPrecos).values({
       insumoId,
@@ -70,7 +74,7 @@ export async function createCompra(
     categoria: insumoId ? "compra_insumo" : "compra_diversa",
     valorCentavos,
     data: hoje,
-    descricao: observacao || (insumoId ? "Compra de insumo" : "Gasto diverso"),
+    descricao: observacao || insumoNome || "Gasto diverso",
     compraInsumoId: compra.id,
   });
 

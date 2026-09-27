@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import { db } from "@/lib/db";
 import { DeleteClienteButton } from "@/components/clientes/delete-cliente-button";
 
@@ -34,7 +34,14 @@ export default async function ClientesPage() {
             >
               <Link href={`/clientes/${cliente.id}`} className="min-w-0 flex-1">
                 <p className="truncate font-medium text-foreground">{cliente.nome}</p>
-                <p className="text-xs text-muted-foreground">{cliente.telefoneWhatsapp}</p>
+                {cliente.telefoneWhatsapp ? (
+                  <p className="text-xs text-muted-foreground">{cliente.telefoneWhatsapp}</p>
+                ) : (
+                  <p className="flex items-center gap-1 text-xs text-primary">
+                    <TriangleAlert className="size-3" aria-hidden />
+                    Falta o WhatsApp
+                  </p>
+                )}
               </Link>
               <DeleteClienteButton clienteId={cliente.id} clienteNome={cliente.nome} />
             </li>

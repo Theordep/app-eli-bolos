@@ -9,7 +9,7 @@ import { requireUser } from "@/lib/auth";
 
 const ClienteSchema = z.object({
   nome: z.string().trim().min(1, { error: "Digite um nome." }),
-  telefoneWhatsapp: z.string().trim().min(1, { error: "Digite o WhatsApp." }),
+  telefoneWhatsapp: z.string().trim().optional(),
   enderecoEntrega: z.string().trim().optional(),
   observacoes: z.string().trim().optional(),
 });
@@ -19,7 +19,7 @@ export type ClienteState = { error: string } | undefined;
 function parseForm(formData: FormData) {
   return ClienteSchema.safeParse({
     nome: formData.get("nome"),
-    telefoneWhatsapp: formData.get("telefoneWhatsapp"),
+    telefoneWhatsapp: formData.get("telefoneWhatsapp") || undefined,
     enderecoEntrega: formData.get("enderecoEntrega") || undefined,
     observacoes: formData.get("observacoes") || undefined,
   });

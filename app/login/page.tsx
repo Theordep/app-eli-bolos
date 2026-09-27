@@ -19,7 +19,7 @@ export default function LoginPage() {
       <div className="relative flex w-full max-w-sm flex-col items-center">
         <Image
           src="/logo.png"
-          alt="Eli Bolos"
+          alt="Bolos Elisângela"
           width={128}
           height={128}
           priority
@@ -56,6 +56,7 @@ export default function LoginPage() {
             </label>
             <div className="relative">
               <input
+                key={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
